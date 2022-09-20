@@ -7,7 +7,7 @@ This app displays a question and 3 answers. The user can click on answer boxes a
 
 ### App Walk-though
 
-<img src="https://imgur.com/gpH7EDK" width=200><br>
+<img src="https://imgur.com/a/ZFyA9DS" width=200><br>
 
 ## Required
 - [x] Create New Project in Android Studio
