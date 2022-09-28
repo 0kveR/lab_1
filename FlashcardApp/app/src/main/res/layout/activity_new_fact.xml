@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
+
+    <EditText
+        android:id="@+id/add_question"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Question..."
+        android:layout_marginTop="100dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp" />
+
+    <EditText
+        android:id="@+id/add_answer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Answer..."
+        android:layout_marginTop="200dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp" />
+
+    <ImageView
+        android:id="@+id/cancel_btn"
+        android:src="@drawable/ic_cancel_btn"
+        android:layout_marginTop="600dp"
+        android:layout_marginStart="300dp"
+        android:layout_height="50dp"
+        android:layout_width="50dp" />
+</RelativeLayout>
