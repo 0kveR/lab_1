@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var addFact: ImageView
     private lateinit var bg: RelativeLayout
     private lateinit var editFact: ImageView
+    var correctAnswer = 3
 
     @SuppressLint("SetTextI18n", "UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,25 +58,45 @@ class MainActivity : AppCompatActivity() {
 
                 when (multi) {
                     "0" -> {
+                        resetColors()
                         ans1.visibility = View.INVISIBLE
                         ans2.visibility = View.INVISIBLE
                         ans3.visibility = View.INVISIBLE
                     }
                     "1" -> {
+                        resetColors()
                         ans1.visibility = View.VISIBLE
-                        ans2.visibility = View.INVISIBLE
-                        ans3.visibility = View.VISIBLE
-                        ans1.text = data.getStringExtra("IncorrectAnswer1")
-                        ans2.text = ""
-                        ans3.text = data.getStringExtra("Answer")
+                        ans2.visibility = View.VISIBLE
+                        ans3.visibility = View.INVISIBLE
+                        correctAnswer = (1..2).random()
+                        if (correctAnswer == 1) {
+                            ans1.text = data.getStringExtra("Answer")
+                            ans2.text = data.getStringExtra("IncorrectAnswer1")
+                        } else {
+                            ans1.text = data.getStringExtra("IncorrectAnswer1")
+                            ans2.text = data.getStringExtra("Answer")
+                        }
+                        ans3.text = ""
                     }
                     "3" -> {
+                        resetColors()
                         ans1.visibility = View.VISIBLE
                         ans2.visibility = View.VISIBLE
                         ans3.visibility = View.VISIBLE
-                        ans1.text = data.getStringExtra("IncorrectAnswer1")
-                        ans2.text = data.getStringExtra("IncorrectAnswer2")
-                        ans3.text = data.getStringExtra("Answer")
+                        correctAnswer = (1..3).random()
+                        if (correctAnswer == 1) {
+                            ans1.text = data.getStringExtra("Answer")
+                            ans2.text = data.getStringExtra("IncorrectAnswer1")
+                            ans3.text = data.getStringExtra("IncorrectAnswer2")
+                        } else if (correctAnswer == 2) {
+                            ans1.text = data.getStringExtra("IncorrectAnswer1")
+                            ans2.text = data.getStringExtra("Answer")
+                            ans3.text = data.getStringExtra("IncorrectAnswer2")
+                        } else {
+                            ans1.text = data.getStringExtra("IncorrectAnswer1")
+                            ans2.text = data.getStringExtra("IncorrectAnswer2")
+                            ans3.text = data.getStringExtra("Answer")
+                        }
                     }
                 }
             } else {
@@ -84,15 +105,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         ans1.setOnClickListener {
-            it.background = resources.getDrawable(R.drawable.answer_incorrect)
+            if (correctAnswer == 1) {
+                it.background = resources.getDrawable(R.drawable.answer_correct)
+            } else {
+                it.background = resources.getDrawable(R.drawable.answer_incorrect)
+            }
         }
 
         ans2.setOnClickListener {
-            it.background = resources.getDrawable(R.drawable.answer_incorrect)
+            if (correctAnswer == 2) {
+                it.background = resources.getDrawable(R.drawable.answer_correct)
+            } else {
+                it.background = resources.getDrawable(R.drawable.answer_incorrect)
+            }
         }
 
         ans3.setOnClickListener {
-            it.background = resources.getDrawable(R.drawable.answer_correct)
+            if (correctAnswer == 3) {
+                it.background = resources.getDrawable(R.drawable.answer_correct)
+            } else {
+                it.background = resources.getDrawable(R.drawable.answer_incorrect)
+            }
         }
 
         questionSide.setOnClickListener { reveal() }
@@ -110,17 +143,30 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("EditMode", "true")
             intent.putExtra("Question", questionSide.text.toString())
             intent.putExtra("CorrectAnswer", answerSide.text.toString())
-            intent.putExtra("IncorrectAnswer", ans1.text.toString())
-            intent.putExtra("IncorrectAnswer2", ans2.text.toString())
+            if (correctAnswer == 1) {
+                intent.putExtra("IncorrectAnswer", ans2.text.toString())
+                intent.putExtra("IncorrectAnswer2", ans3.text.toString())
+            } else if (correctAnswer == 2) {
+                intent.putExtra("IncorrectAnswer", ans1.text.toString())
+                intent.putExtra("IncorrectAnswer2", ans3.text.toString())
+            } else {
+                intent.putExtra("IncorrectAnswer", ans1.text.toString())
+                intent.putExtra("IncorrectAnswer2", ans2.text.toString())
+            }
             resultLauncher.launch(intent)
         }
 
         bg.setOnClickListener {
-            ans1.background = resources.getDrawable(R.drawable.answer_default)
-            ans2.background = resources.getDrawable(R.drawable.answer_default)
-            ans3.background = resources.getDrawable(R.drawable.answer_default)
+            resetColors()
             conceal()
         }
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun resetColors() {
+        ans1.background = resources.getDrawable(R.drawable.answer_default)
+        ans2.background = resources.getDrawable(R.drawable.answer_default)
+        ans3.background = resources.getDrawable(R.drawable.answer_default)
     }
 
     private fun reveal() {
