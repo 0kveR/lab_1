@@ -60,11 +60,17 @@ class MainActivity : AppCompatActivity() {
                         ans3.visibility = View.INVISIBLE
                     }
                     "1" -> {
-                        ans1.text = data.getStringExtra("IncorrectAnswer1")
+                        ans1.visibility = View.VISIBLE
                         ans2.visibility = View.INVISIBLE
+                        ans3.visibility = View.VISIBLE
+                        ans1.text = data.getStringExtra("IncorrectAnswer1")
+                        ans2.text = ""
                         ans3.text = data.getStringExtra("Answer")
                     }
                     "3" -> {
+                        ans1.visibility = View.VISIBLE
+                        ans2.visibility = View.VISIBLE
+                        ans3.visibility = View.VISIBLE
                         ans1.text = data.getStringExtra("IncorrectAnswer1")
                         ans2.text = data.getStringExtra("IncorrectAnswer2")
                         ans3.text = data.getStringExtra("Answer")
