@@ -1,10 +1,12 @@
 package com.example.flashcardapp
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import com.example.flashcardapp.databinding.ActivityNewFactBinding
 
 class NewFact : AppCompatActivity() {
@@ -16,6 +18,7 @@ class NewFact : AppCompatActivity() {
     private lateinit var incorrectAnswer1: EditText
     private lateinit var incorrectAnswer2: EditText
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         newFactBinding = ActivityNewFactBinding.inflate(layoutInflater)
@@ -35,6 +38,7 @@ class NewFact : AppCompatActivity() {
         if (mode == "true") {
             question.setText(intent.getStringExtra("Question"))
             answer.setText(intent.getStringExtra("CorrectAnswer"))
+            newFactBinding.header.text = "Edit Flashcard"
             incorrectAnswer1.setText(intent.getStringExtra("IncorrectAnswer"))
             incorrectAnswer2.setText(intent.getStringExtra("IncorrectAnswer2"))
         }
@@ -69,6 +73,8 @@ class NewFact : AppCompatActivity() {
 
                 setResult(RESULT_OK, data)
                 finish()
+            } else {
+                Toast.makeText(applicationContext, "Question and Answer are required", Toast.LENGTH_SHORT).show()
             }
         }
     }

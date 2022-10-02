@@ -11,6 +11,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.flashcardapp.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mainBinding: ActivityMainBinding
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
             val data: Intent? = result.data
 
             if (data != null) {
+                Snackbar.make(bg, "Card created successfully", Snackbar.LENGTH_SHORT).show()
                 val questionString = data.getStringExtra("Question")
                 val answerString = data.getStringExtra("Answer")
                 val multi = data.getStringExtra("Multi")
@@ -76,6 +78,8 @@ class MainActivity : AppCompatActivity() {
                         ans3.text = data.getStringExtra("Answer")
                     }
                 }
+            } else {
+                Snackbar.make(bg, "Card discarded ;)", Snackbar.LENGTH_SHORT).show()
             }
         }
 

@@ -8,6 +8,7 @@
     android:paddingRight="16dp">
 
     <TextView
+        android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -28,7 +29,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="100dp"
         android:layout_marginEnd="20dp"
-        android:hint="Enter Question..." />
+        android:backgroundTint="#B5A8E3"
+        android:hint="Enter Question (Required)" />
 
     <EditText
         android:id="@+id/add_answer"
@@ -40,7 +42,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="75dp"
         android:layout_marginEnd="20dp"
-        android:hint="Enter Correct Answer..." />
+        android:backgroundTint="#289324"
+        android:hint="Enter Correct Answer (Required)" />
 
     <EditText
         android:id="@+id/wrong_answer"
@@ -52,7 +55,9 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="75dp"
         android:layout_marginEnd="20dp"
-        android:hint="Enter Incorrect Answer..." />
+        android:layout_marginBottom="75dp"
+        android:backgroundTint="#F15555"
+        android:hint="Enter Incorrect Answer" />
 
     <EditText
         android:id="@+id/wrong_answer_2"
@@ -64,7 +69,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="75dp"
         android:layout_marginEnd="20dp"
-        android:hint="Enter Incorrect Answer..." />
+        android:backgroundTint="#F15555"
+        android:hint="Enter Incorrect Answer" />
 
     <ImageView
         android:id="@+id/cancel_btn"
@@ -85,4 +91,5 @@
         android:layout_marginStart="30dp"
         android:layout_marginBottom="60dp"
         android:src="@drawable/ic_save_btn" />
+
 </RelativeLayout>
