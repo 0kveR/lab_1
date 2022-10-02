@@ -62,6 +62,9 @@ class MainActivity : AppCompatActivity() {
                         ans1.visibility = View.INVISIBLE
                         ans2.visibility = View.INVISIBLE
                         ans3.visibility = View.INVISIBLE
+                        ans1.text = ""
+                        ans2.text = ""
+                        ans3.text = ""
                     }
                     "1" -> {
                         resetColors()

@@ -5,7 +5,7 @@ A flashcard app that allows the user add their own flashcards ones.
 
 ### App Walk-though
 
-<img src="https://i.imgur.com/lfx0tdI.gif" width=200><br>
+<img src="https://i.imgur.com/2NvluUZ.gif" width=200><br>
 
 ## Required
 - [x] User can click on a ‘+’ button that takes the user to new ‘Add Card Screen’
