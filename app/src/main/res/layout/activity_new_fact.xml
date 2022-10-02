@@ -34,13 +34,37 @@
         android:id="@+id/add_answer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
         android:layout_alignTop="@id/add_question"
+        android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:hint="Enter Answer..."
-        android:layout_marginTop="75dp"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp" />
+        android:layout_marginTop="75dp"
+        android:layout_marginEnd="20dp"
+        android:hint="Enter Correct Answer..." />
+
+    <EditText
+        android:id="@+id/wrong_answer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/add_answer"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="75dp"
+        android:layout_marginEnd="20dp"
+        android:hint="Enter Incorrect Answer..." />
+
+    <EditText
+        android:id="@+id/wrong_answer_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/wrong_answer"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="75dp"
+        android:layout_marginEnd="20dp"
+        android:hint="Enter Incorrect Answer..." />
 
     <ImageView
         android:id="@+id/cancel_btn"
