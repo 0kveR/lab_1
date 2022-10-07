@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -14,100 +14,107 @@ import com.example.flashcardapp.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
+    lateinit var flashcardDatabase: FlashcardDatabase
+    var allFlashcards = mutableListOf<Flashcard>()
     private lateinit var mainBinding: ActivityMainBinding
-    private lateinit var ans1: TextView
-    private lateinit var ans2: TextView
-    private lateinit var ans3: TextView
+    private lateinit var choice1: TextView
+    private lateinit var choice2: TextView
+    private lateinit var choice3: TextView
     private lateinit var questionSide: TextView
     private lateinit var answerSide: TextView
     private lateinit var addFact: ImageView
-    private lateinit var bg: RelativeLayout
     private lateinit var editFact: ImageView
-    var correctAnswer = 3
+    private lateinit var prev: ImageView
+    private lateinit var next: ImageView
+    private lateinit var trash: ImageView
+    private lateinit var bg: RelativeLayout
+    private var correctAnswer: Int = randInt(1, 3)
+    private var currentCard: Int = 0
 
     @SuppressLint("SetTextI18n", "UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mainBinding.root)
+        flashcardDatabase = FlashcardDatabase(this)
+        updateList()
 
-        var switch = false
+        if (allFlashcards.size == 0) {
+            flashcardDatabase.initFirstCard()
+            updateList()
+        }
 
         mainBinding.let {
-            ans1 = mainBinding.ans1
-            ans2 = mainBinding.ans2
-            ans3 = mainBinding.ans3
+            choice1 = mainBinding.ans1
+            choice2 = mainBinding.ans2
+            choice3 = mainBinding.ans3
             questionSide = mainBinding.questionSide
             answerSide = mainBinding.answerSide
             addFact = mainBinding.addBtn
-            bg = mainBinding.background
             editFact = mainBinding.editBtn
+            prev = mainBinding.prevBtn
+            next = mainBinding.nextBtn
+            trash = mainBinding.trash
+            bg = mainBinding.background
         }
 
-        val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val data: Intent? = result.data
+        cardSetup(currentCard)
 
-            if (data != null) {
-                Snackbar.make(bg, "Card created successfully", Snackbar.LENGTH_SHORT).show()
-                val questionString = data.getStringExtra("Question")
-                val answerString = data.getStringExtra("Answer")
-                val multi = data.getStringExtra("Multi")
+        val resultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                val data: Intent? = result.data
 
-                questionSide.text = questionString
-                answerSide.text = answerString
+                if (data != null) {
+                    val questionString = data.getStringExtra("Question")
+                    val answerString = data.getStringExtra("Answer")
+                    val multi = data.getStringExtra("Multi")
+                    val mode = data.getStringExtra("EditMode")
 
-                when (multi) {
-                    "0" -> {
-                        resetColors()
-                        ans1.visibility = View.INVISIBLE
-                        ans2.visibility = View.INVISIBLE
-                        ans3.visibility = View.INVISIBLE
-                        ans1.text = ""
-                        ans2.text = ""
-                        ans3.text = ""
+                    if (questionString == null || answerString == null) {
+                        return@registerForActivityResult
                     }
-                    "1" -> {
-                        resetColors()
-                        ans1.visibility = View.VISIBLE
-                        ans2.visibility = View.VISIBLE
-                        ans3.visibility = View.INVISIBLE
-                        correctAnswer = (1..2).random()
-                        if (correctAnswer == 1) {
-                            ans1.text = data.getStringExtra("Answer")
-                            ans2.text = data.getStringExtra("IncorrectAnswer1")
-                        } else {
-                            ans1.text = data.getStringExtra("IncorrectAnswer1")
-                            ans2.text = data.getStringExtra("Answer")
+
+                    var incorrectAnswer1: String? = null
+                    var incorrectAnswer2: String? = null
+
+                    resetColors()
+                    when (multi) {
+                        "0" -> {
+                            Log.i("ResultLauncher", "No multi-choice answers")
                         }
-                        ans3.text = ""
-                    }
-                    "3" -> {
-                        resetColors()
-                        ans1.visibility = View.VISIBLE
-                        ans2.visibility = View.VISIBLE
-                        ans3.visibility = View.VISIBLE
-                        correctAnswer = (1..3).random()
-                        if (correctAnswer == 1) {
-                            ans1.text = data.getStringExtra("Answer")
-                            ans2.text = data.getStringExtra("IncorrectAnswer1")
-                            ans3.text = data.getStringExtra("IncorrectAnswer2")
-                        } else if (correctAnswer == 2) {
-                            ans1.text = data.getStringExtra("IncorrectAnswer1")
-                            ans2.text = data.getStringExtra("Answer")
-                            ans3.text = data.getStringExtra("IncorrectAnswer2")
-                        } else {
-                            ans1.text = data.getStringExtra("IncorrectAnswer1")
-                            ans2.text = data.getStringExtra("IncorrectAnswer2")
-                            ans3.text = data.getStringExtra("Answer")
+                        "1" -> {
+                            if (data.getStringExtra("IncorrectAnswer1") != null) {
+                                incorrectAnswer1 = data.getStringExtra("IncorrectAnswer1")
+                            }
+                        }
+                        "3" -> {
+                            if (data.getStringExtra("IncorrectAnswer1") != null && data.getStringExtra(
+                                    "IncorrectAnswer2"
+                                ) != null
+                            ) {
+                                incorrectAnswer1 = data.getStringExtra("IncorrectAnswer1")
+                                incorrectAnswer2 = data.getStringExtra("IncorrectAnswer2")
+                            }
                         }
                     }
+
+                    if (mode == "true") {
+                        flashcardDatabase.updateCard(Flashcard(questionString, answerString, incorrectAnswer1, incorrectAnswer2))
+                        updateList()
+                        Snackbar.make(bg, "Card updated successfully", Snackbar.LENGTH_SHORT).show()
+                    } else {
+                        flashcardDatabase.insertCard(Flashcard(questionString, answerString, incorrectAnswer1, incorrectAnswer2))
+                        updateList()
+                        currentCard = allFlashcards.size - 1
+                        Snackbar.make(bg, "Card created successfully", Snackbar.LENGTH_SHORT).show()
+                    }
+                    cardSetup(currentCard)
+                } else {
+                    Snackbar.make(bg, "Card discarded ;)", Snackbar.LENGTH_SHORT).show()
                 }
-            } else {
-                Snackbar.make(bg, "Card discarded ;)", Snackbar.LENGTH_SHORT).show()
             }
-        }
 
-        ans1.setOnClickListener {
+        choice1.setOnClickListener {
             if (correctAnswer == 1) {
                 it.background = resources.getDrawable(R.drawable.answer_correct)
             } else {
@@ -115,7 +122,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        ans2.setOnClickListener {
+        choice2.setOnClickListener {
             if (correctAnswer == 2) {
                 it.background = resources.getDrawable(R.drawable.answer_correct)
             } else {
@@ -123,7 +130,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        ans3.setOnClickListener {
+        choice3.setOnClickListener {
             if (correctAnswer == 3) {
                 it.background = resources.getDrawable(R.drawable.answer_correct)
             } else {
@@ -146,17 +153,63 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("EditMode", "true")
             intent.putExtra("Question", questionSide.text.toString())
             intent.putExtra("CorrectAnswer", answerSide.text.toString())
-            if (correctAnswer == 1) {
-                intent.putExtra("IncorrectAnswer", ans2.text.toString())
-                intent.putExtra("IncorrectAnswer2", ans3.text.toString())
-            } else if (correctAnswer == 2) {
-                intent.putExtra("IncorrectAnswer", ans1.text.toString())
-                intent.putExtra("IncorrectAnswer2", ans3.text.toString())
-            } else {
-                intent.putExtra("IncorrectAnswer", ans1.text.toString())
-                intent.putExtra("IncorrectAnswer2", ans2.text.toString())
+            when (correctAnswer) {
+                1 -> {
+                    intent.putExtra("IncorrectAnswer", choice2.text.toString())
+                    intent.putExtra("IncorrectAnswer2", choice3.text.toString())
+                }
+                2 -> {
+                    intent.putExtra("IncorrectAnswer", choice1.text.toString())
+                    intent.putExtra("IncorrectAnswer2", choice3.text.toString())
+                }
+                else -> {
+                    intent.putExtra("IncorrectAnswer", choice1.text.toString())
+                    intent.putExtra("IncorrectAnswer2", choice2.text.toString())
+                }
             }
             resultLauncher.launch(intent)
+        }
+
+        prev.setOnClickListener {
+            if (allFlashcards.size == 1) {
+                return@setOnClickListener
+            }
+
+            resetColors()
+            if (currentCard == 0) {
+                currentCard = allFlashcards.size - 1
+                cardSetup(currentCard)
+            } else {
+                currentCard--
+                cardSetup(currentCard)
+            }
+        }
+
+        next.setOnClickListener {
+            if (allFlashcards.size == 1) {
+                return@setOnClickListener
+            }
+            resetColors()
+            if (currentCard == allFlashcards.size - 1) {
+                currentCard = 0
+                cardSetup(currentCard)
+            } else {
+                currentCard++
+                cardSetup(currentCard)
+            }
+        }
+
+        trash.setOnClickListener {
+            resetColors()
+            flashcardDatabase.deleteCard(allFlashcards[currentCard].question)
+            updateList()
+
+            if (currentCard == 0) {
+                currentCard = allFlashcards.size
+            }
+
+            currentCard--
+            cardSetup(currentCard)
         }
 
         bg.setOnClickListener {
@@ -167,9 +220,9 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun resetColors() {
-        ans1.background = resources.getDrawable(R.drawable.answer_default)
-        ans2.background = resources.getDrawable(R.drawable.answer_default)
-        ans3.background = resources.getDrawable(R.drawable.answer_default)
+        choice1.background = resources.getDrawable(R.drawable.answer_default)
+        choice2.background = resources.getDrawable(R.drawable.answer_default)
+        choice3.background = resources.getDrawable(R.drawable.answer_default)
     }
 
     private fun reveal() {
@@ -180,5 +233,68 @@ class MainActivity : AppCompatActivity() {
     private fun conceal() {
         answerSide.visibility = View.INVISIBLE
         questionSide.visibility = View.VISIBLE
+    }
+
+    private fun makeChoicesVisible() {
+        choice1.visibility = View.VISIBLE
+        choice2.visibility = View.VISIBLE
+        choice3.visibility = View.VISIBLE
+    }
+
+    private fun randInt(low: Int, high: Int): Int {
+        return (low..high).random()
+    }
+
+    private fun updateList() {
+        allFlashcards = flashcardDatabase.getAllCards().toMutableList()
+    }
+
+    fun cardSetup(cardNumber: Int) {
+        questionSide.text = allFlashcards[cardNumber].question
+        answerSide.text = allFlashcards[cardNumber].answer
+
+        if (allFlashcards[cardNumber].wrongAnswer1 != null && allFlashcards[cardNumber].wrongAnswer2 != null) {
+            correctAnswer = randInt(1, 3)
+            makeChoicesVisible()
+
+            when (correctAnswer) {
+                1 -> {
+                    choice1.text = allFlashcards[cardNumber].answer
+                    choice2.text = allFlashcards[cardNumber].wrongAnswer1
+                    choice3.text = allFlashcards[cardNumber].wrongAnswer2
+                }
+                2 -> {
+                    choice1.text = allFlashcards[cardNumber].wrongAnswer1
+                    choice2.text = allFlashcards[cardNumber].answer
+                    choice3.text = allFlashcards[cardNumber].wrongAnswer2
+                }
+                else -> {
+                    choice1.text = allFlashcards[cardNumber].wrongAnswer1
+                    choice2.text = allFlashcards[cardNumber].wrongAnswer2
+                    choice3.text = allFlashcards[cardNumber].answer
+                }
+            }
+        } else if (allFlashcards[cardNumber].wrongAnswer1 != null) {
+            correctAnswer = randInt(1, 2)
+            makeChoicesVisible()
+            choice2.visibility = View.INVISIBLE
+            choice2.text = ""
+
+            if (correctAnswer == 1) {
+                choice1.text = allFlashcards[cardNumber].answer
+                choice3.text = allFlashcards[cardNumber].wrongAnswer1
+            } else {
+                choice1.text = allFlashcards[cardNumber].wrongAnswer1
+                choice3.text = allFlashcards[cardNumber].answer
+            }
+        } else {
+            correctAnswer = 1
+            choice1.visibility = View.INVISIBLE
+            choice2.visibility = View.INVISIBLE
+            choice3.visibility = View.INVISIBLE
+            choice1.text = ""
+            choice2.text = ""
+            choice3.text = ""
+        }
     }
 }

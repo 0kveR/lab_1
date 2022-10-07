@@ -71,6 +71,12 @@ class NewFact : AppCompatActivity() {
                     }
                 }
 
+                if (mode == "true") {
+                    data.putExtra("EditMode", "true")
+                } else {
+                    data.putExtra("EditMode", "false")
+                }
+
                 setResult(RESULT_OK, data)
                 finish()
             } else {
