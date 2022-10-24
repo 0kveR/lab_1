@@ -6,6 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewAnimationUtils
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -146,6 +149,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, NewFact::class.java)
             intent.putExtra("EditMode", "false")
             resultLauncher.launch(intent)
+            overridePendingTransition(R.anim.right_in, R.anim.left_out)
         }
 
         editFact.setOnClickListener {
@@ -168,6 +172,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             resultLauncher.launch(intent)
+            overridePendingTransition(R.anim.right_in, R.anim.left_out)
         }
 
         prev.setOnClickListener {
@@ -189,13 +194,47 @@ class MainActivity : AppCompatActivity() {
             if (allFlashcards.size == 1) {
                 return@setOnClickListener
             }
-            resetColors()
-            if (currentCard == allFlashcards.size - 1) {
-                currentCard = 0
-                cardSetup(currentCard)
+
+            val leftOut = AnimationUtils.loadAnimation(this, R.anim.left_out)
+            val rightIn = AnimationUtils.loadAnimation(this, R.anim.right_in)
+
+            leftOut.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(p0: Animation?) {
+                    choice1.startAnimation(leftOut)
+                    choice2.startAnimation(leftOut)
+                    choice3.startAnimation(leftOut)
+                }
+
+                override fun onAnimationEnd(p0: Animation?) {
+                    resetColors()
+                    if (currentCard == allFlashcards.size - 1) {
+                        currentCard = 0
+                        cardSetup(currentCard)
+                    } else {
+                        currentCard++
+                        cardSetup(currentCard)
+                    }
+
+                    if (answerSide.visibility == View.VISIBLE) {
+                        answerSide.visibility = View.INVISIBLE
+                        questionSide.visibility = View.VISIBLE
+                    }
+
+                    questionSide.startAnimation(rightIn)
+                    choice1.startAnimation(rightIn)
+                    choice2.startAnimation(rightIn)
+                    choice3.startAnimation(rightIn)
+                }
+
+                override fun onAnimationRepeat(p0: Animation?) {
+                    //
+                }
+            })
+
+            if (answerSide.visibility == View.VISIBLE) {
+                answerSide.startAnimation(leftOut)
             } else {
-                currentCard++
-                cardSetup(currentCard)
+                questionSide.startAnimation(leftOut)
             }
         }
 
@@ -226,8 +265,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun reveal() {
+        val cx = answerSide.width / 2
+        val cy = answerSide.height / 2
+        val finalRadius = Math.hypot(cx.toDouble(), cy.toDouble()).toFloat()
+        val anim = ViewAnimationUtils.createCircularReveal(answerSide, cx, cy, 0f, finalRadius)
         questionSide.visibility = View.INVISIBLE
         answerSide.visibility = View.VISIBLE
+        anim.duration = 500
+        anim.start()
     }
 
     private fun conceal() {
